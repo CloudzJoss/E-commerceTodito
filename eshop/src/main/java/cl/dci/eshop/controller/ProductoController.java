@@ -1,77 +1,70 @@
 package cl.dci.eshop.controller;
 
-import cl.dci.eshop.auth.User;
-import cl.dci.eshop.model.Carrito;
 import cl.dci.eshop.model.Producto;
-import cl.dci.eshop.model.ProductoCarrito;
-import cl.dci.eshop.repository.CarritoRepository;
-import cl.dci.eshop.repository.ProductoCarritoRepository;
 import cl.dci.eshop.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
-@RequestMapping("/api/producto")
+@RequestMapping("/producto") // Base URL for all handlers in this controller
 public class ProductoController {
 
     @Autowired
-    private ProductoRepository productoJpaRepository;
-    @Autowired
-    private ProductoCarritoRepository productoCarritoRepository;
-    @Autowired
-    private CarritoRepository carritoRepository;
+    private ProductoRepository productoRepository;
 
-
-
-    @PreAuthorize("hasAuthority('producto:write')")
-    @PostMapping("/crear")
-    public String crearProducto(@ModelAttribute("producto") Producto producto){
-
-        productoJpaRepository.save(producto);
-        return "redirect:/admin/productos";
+    // Display form to create a new product
+    @GetMapping("/new")
+    public String newProductoForm(Model model) {
+        model.addAttribute("producto", new Producto());
+        return "crear-producto"; // returns HTML view to create a product
     }
 
-
-    @PreAuthorize("hasAuthority('producto:delete')")
-    @PostMapping("/delete/{id}")
-    public String eliminarProducto(@PathVariable int id){
-        List<ProductoCarrito> pcs = productoCarritoRepository.findByProducto(productoJpaRepository.findById(id).orElse(null));
-        if (!pcs.isEmpty()) {
-            for (ProductoCarrito pc : pcs) {
-                Carrito c = pc.getCarrito();
-                Producto p = pc.getProducto();
-                c.deleteProducto(p);
-                carritoRepository.save(c);
-                productoCarritoRepository.delete(pc);
-            }
+    // Save new product
+    @PostMapping("/save")
+    public String saveProducto(@ModelAttribute Producto producto, @RequestParam("imagen") MultipartFile imagenFile, RedirectAttributes attributes) {
+        if (!imagenFile.isEmpty()) {
+            String imagePath = saveImage(imagenFile); // Save image and get path
+            producto.setImagenUrl(imagePath); // Set image URL to product
         }
-        productoJpaRepository.deleteById(id);
-        return "redirect:/admin/productos";
-    }
-    @PreAuthorize("hasAuthority('producto:update')")
-    @GetMapping("/update/{id}")
-    public String getEditarProducto(@PathVariable int id, Model modelo){
-
-        Producto producto = productoJpaRepository.findById(id).orElse(null);
-        modelo.addAttribute("producto", producto);
-
-        return "/admin/producto-update";
+        productoRepository.save(producto); // Save product to database
+        attributes.addFlashAttribute("mensaje", "Producto guardado con éxito");
+        return "redirect:/producto/productos"; // Redirect to product listing
     }
 
-    @PreAuthorize("hasAuthority('producto:update')")
-    @PostMapping("/update")
-    public String editarProducto(@ModelAttribute("pruducto") Producto producto){
-        productoJpaRepository.save(producto);
-        return "redirect:/admin/productos";
+    // Edit product form
+    @GetMapping("/edit/{id}")
+    public String editProductoForm(@PathVariable Integer id, Model model) {
+        Producto producto = productoRepository.findById(id).orElse(null);
+        model.addAttribute("producto", producto);
+        return "editar-producto"; // returns HTML view to edit the product
     }
 
+    // List all products
+    @GetMapping("/productos")
+    public String listProductos(Model model) {
+        model.addAttribute("productos", productoRepository.findAll());
+        return "productos"; // returns HTML view displaying all products
+    }
 
-
-
+    // Utility method to save image
+    private String saveImage(MultipartFile file) {
+        try {
+            String folder = "C:\\Users\\jkj65\\OneDrive\\Escritorio\\AlmacenImagenesTodito\\"; // Path to save the images
+            Path path = Paths.get(folder + file.getOriginalFilename());
+            Files.write(path, file.getBytes()); // Save the image file
+            return path.toString(); // Return the path string where image is saved
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Return null if there is an error
+        }
+    }
 }

@@ -68,26 +68,29 @@
                 <div class="col-3"></div>
                 <div class="col-6 shadow-lg p-3 mb-5 bg-white rounded"><br>
                     <h2>Crear nuevo producto</h2> <br>
-                    <form th:action="@{/api/producto/crear}" th:object="${producto}" method="post">
+                    <form th:action="@{/producto/save}" th:object="${producto}" method="post" enctype="multipart/form-data">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <span><i class="fa fa-keyboard"></i> Nombre</span>
-                                </div>
+                                <span class="input-group-text"><i class="fa fa-keyboard"></i> Nombre</span>
                             </div>
-                            <input type="text" class="form-control" placeholder="Nombre del producto"
-                                   th:field="*{nombre}">
+                            <input type="text" class="form-control" placeholder="Nombre del producto" th:field="*{nombre}">
                         </div>
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <span><i class="fa fa-dollar-sign"></i> Precio</span>
-                                </div>
+                                <span class="input-group-text"><i class="fa fa-dollar-sign"></i> Precio</span>
                             </div>
                             <input type="number" class="form-control" min="0" th:field="*{precio}">
                         </div>
+                        <!-- Campo para cargar imagen -->
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Imagen del Producto</span>
+                            </div>
+                            <input type="file" class="form-control" name="imagen">
+                        </div>
                         <button type="submit" class="btn btn-success">Agregar nuevo producto</button>
                     </form>
+
                     <br>
                 </div>
                 <div class="col-3"></div>

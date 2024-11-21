@@ -17,37 +17,30 @@
     <div class="col-6 shadow-lg p-3 mb-5 bg-white rounded"><br>
         <h2>Editar producto</h2> <br>
         <div class="input-group mb-3 justify-content-center">
-            <form th:action="@{/api/producto/update}" th:object="${producto}" method="post">
+            <form th:action="@{/api/producto/update}" th:object="${producto}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:field="*{id}">
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <div class="input-group-text">
-                            <span><i class="fa fa-key"></i> ID</span>
-                        </div>
-                    </div>
-                    <input type="text" placeholder="Nombre del producto" th:field="*{id}" disabled>
-                    <input type="hidden" placeholder="Nombre del producto" th:field="*{id}">
-                </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <div class="input-group-text">
-                            <span><i class="fa fa-keyboard"></i> Nombre</span>
-                        </div>
+                        <span class="input-group-text"><i class="fa fa-keyboard"></i> Nombre</span>
                     </div>
                     <input type="text" placeholder="Nombre del producto" th:field="*{nombre}">
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <div class="input-group-text">
-                            <span><i class="fa fa-dollar-sign"></i> Precio</span>
-                        </div>
+                        <span class="input-group-text"><i class="fa fa-dollar-sign"></i> Precio</span>
                     </div>
                     <input type="number" min="0" th:field="*{precio}">
                 </div>
+                <!-- Campo para cargar imagen -->
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Imagen del Producto</span>
+                    </div>
+                    <input type="file" class="form-control" name="imagen">
+                </div>
                 <button type="submit" class="btn btn-success">Editar producto</button>
-                <a href="/admin/productos">
-                    <button type="button" class="btn btn-danger">Cancelar y volver</button>
-                </a>
             </form>
+
         </div>
         <br>
     </div>

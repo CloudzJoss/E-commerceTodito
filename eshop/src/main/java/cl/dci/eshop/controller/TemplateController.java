@@ -224,30 +224,6 @@ public class TemplateController {
 
     private void poblarBd() {
 
-        Producto p1 = new Producto("Producto 1", 2000);
-        Producto p2 = new Producto("Producto 2", 2500);
-        Producto p3 = new Producto("Producto 3", 3000);
-        Producto p4 = new Producto("Producto 4", 5000);
-
-
-
-        productoRepository.save(p1);
-        productoRepository.save(p2);
-        productoRepository.save(p3);
-        productoRepository.save(p4);
-
-
-
-        /*User user = getCurrentUser();
-        carrito.setUser(user);
-        System.out.println(carrito);*/
-
-        //carritoRepository.save(carrito);
-        /*User u = userRepository.findById(user.getId()).orElse(null);
-
-        u.setCarrito(carrito);
-        userRepository.save(u);
-        System.out.println(u);*/
     }
 
 }
