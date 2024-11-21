@@ -13,58 +13,98 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Controller
-@RequestMapping("/producto") // Base URL for all handlers in this controller
+@RequestMapping("/producto") // Base URL para todos los handlers
 public class ProductoController {
 
     @Autowired
     private ProductoRepository productoRepository;
 
-    // Display form to create a new product
+    private static final String UPLOAD_DIR = "src/main/resources/static/images/";
+
+
+    // Mostrar formulario para crear producto
     @GetMapping("/new")
     public String newProductoForm(Model model) {
         model.addAttribute("producto", new Producto());
-        return "crear-producto"; // returns HTML view to create a product
+        return "crear-producto";
     }
 
-    // Save new product
+    // Guardar producto
     @PostMapping("/save")
     public String saveProducto(@ModelAttribute Producto producto, @RequestParam("imagen") MultipartFile imagenFile, RedirectAttributes attributes) {
         if (!imagenFile.isEmpty()) {
-            String imagePath = saveImage(imagenFile); // Save image and get path
-            producto.setImagenUrl(imagePath); // Set image URL to product
+            String imagePath = saveImage(imagenFile);
+            producto.setImagenUrl(imagePath); // Asignar URL de la imagen al producto
         }
-        productoRepository.save(producto); // Save product to database
+        productoRepository.save(producto);
         attributes.addFlashAttribute("mensaje", "Producto guardado con éxito");
-        return "redirect:/producto/productos"; // Redirect to product listing
+        return "redirect:/producto/productos";
     }
 
-    // Edit product form
-    @GetMapping("/edit/{id}")
+    // Mostrar formulario de edición
+    @GetMapping("/edit/form/{id}")
     public String editProductoForm(@PathVariable Integer id, Model model) {
         Producto producto = productoRepository.findById(id).orElse(null);
         model.addAttribute("producto", producto);
-        return "editar-producto"; // returns HTML view to edit the product
+        return "editar-producto";
     }
 
-    // List all products
+    // Guardar cambios en producto editado
+    @PostMapping("/edit/{id}")
+    public String updateProducto(@PathVariable Integer id, @ModelAttribute Producto producto, @RequestParam(value = "imagen", required = false) MultipartFile imagenFile, RedirectAttributes attributes) {
+        Producto existingProducto = productoRepository.findById(id).orElse(null);
+        if (existingProducto != null) {
+            existingProducto.setNombre(producto.getNombre());
+            existingProducto.setPrecio(producto.getPrecio());
+            if (imagenFile != null && !imagenFile.isEmpty()) {
+                String imagePath = saveImage(imagenFile);
+                existingProducto.setImagenUrl(imagePath);
+            }
+            productoRepository.save(existingProducto);
+            attributes.addFlashAttribute("mensaje", "Producto actualizado con éxito");
+        }
+        return "redirect:/producto/productos";
+    }
+
+    // Mostrar lista de productos
     @GetMapping("/productos")
     public String listProductos(Model model) {
         model.addAttribute("productos", productoRepository.findAll());
-        return "productos"; // returns HTML view displaying all products
+        return "productos";
     }
 
-    // Utility method to save image
+    // Guardar imagen
     private String saveImage(MultipartFile file) {
+        if (file.isEmpty()) {
+            System.out.println("El archivo está vacío.");
+            return null;
+        }
         try {
-            String folder = "C:\\Users\\jkj65\\OneDrive\\Escritorio\\AlmacenImagenesTodito\\"; // Path to save the images
-            Path path = Paths.get(folder + file.getOriginalFilename());
-            Files.write(path, file.getBytes()); // Save the image file
-            return path.toString(); // Return the path string where image is saved
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+                System.out.println("Directorio creado: " + uploadPath.toString());
+            }
+
+            Path filePath = uploadPath.resolve(file.getOriginalFilename());
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Imagen guardada en: " + filePath.toString());
+            return "/images/" + file.getOriginalFilename();
         } catch (IOException e) {
             e.printStackTrace();
-            return null; // Return null if there is an error
+            return null;
         }
+    }
+
+
+    // Eliminar producto
+    @GetMapping("/delete/{id}")
+    public String deleteProducto(@PathVariable Integer id, RedirectAttributes attributes) {
+        productoRepository.deleteById(id);
+        attributes.addFlashAttribute("mensaje", "Producto eliminado con éxito");
+        return "redirect:/producto/productos";
     }
 }

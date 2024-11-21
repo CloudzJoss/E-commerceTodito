@@ -21,6 +21,7 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
+        <!-- Tab para listar productos -->
         <div id="home" class="container tab-pane active"><br>
             <div class="row">
                 <div class="col-2"></div>
@@ -32,26 +33,27 @@
                             <tr>
                                 <th>Nombre</th>
                                 <th>Precio</th>
+                                <th>Imagen</th>
                                 <th>Opciones</th>
-
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="producto: ${productos}">
-                                <td th:text="${producto.nombre}">John</td>
-                                <td th:text="'$'+${producto.precio}">Doe</td>
-
+                            <tr th:each="producto : ${productos}">
+                                <td th:text="${producto.nombre}"></td>
+                                <td th:text="'$'+${producto.precio}"></td>
                                 <td>
-
-                                    <form action="#" th:action="@{/api/producto/delete/{id}(id=${producto.id})}"
-                                          method="post"
-                                          onsubmit="return confirm('¿Estás seguro que quieres borrar este producto? No hay vuelta atrás');">
-                                        <a th:href="@{/api/producto/update/{id}(id=${producto.id})}">
+                                    <img th:src="${producto.imagenUrl}" alt="Producto" width="80">
+                                </td>
+                                <td>
+                                    <form th:action="@{/producto/delete/{id}(id=${producto.id})}" method="post"
+                                          onsubmit="return confirm('¿Estás seguro que quieres borrar este producto?');">
+                                        <a th:href="@{/producto/edit/form/{id}(id=${producto.id})}">
                                             <button type="button" class="btn btn-warning">
                                                 <i class="fa fa-edit"></i>
                                             </button>
                                         </a>
-                                        <button type="submit" class="btn btn-danger"><i class="fa fa-trash-alt"></i>
+                                        <button type="submit" class="btn btn-danger">
+                                            <i class="fa fa-trash-alt"></i>
                                         </button>
                                     </form>
                                 </td>
@@ -63,6 +65,8 @@
                 <div class="col-2"></div>
             </div>
         </div>
+
+        <!-- Tab para crear nuevo producto -->
         <div id="menu1" class="container tab-pane fade"><br>
             <div class="row">
                 <div class="col-3"></div>
@@ -90,32 +94,14 @@
                         </div>
                         <button type="submit" class="btn btn-success">Agregar nuevo producto</button>
                     </form>
-
-                    <br>
                 </div>
                 <div class="col-3"></div>
             </div>
-            <br><br><br><br><br><br><br><br><br><br><br>
         </div>
-
     </div>
 </div>
 
 <!-- Footer -->
 <footer th:replace="fragments :: footer"></footer>
-
-
 </body>
-<!--
-<style>
-    footer {
-  background-color: black;
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 40px;
-  color: white;
-}
-</style>
--->
 </html>
